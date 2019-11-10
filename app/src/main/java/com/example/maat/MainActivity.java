@@ -25,6 +25,8 @@ public class MainActivity extends AppCompatActivity {
     private boolean cameraFront = false;
     public static Bitmap bitmap;
 
+    private boolean safeToTakePicture = false;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -35,19 +37,23 @@ public class MainActivity extends AppCompatActivity {
 
         mCamera =  Camera.open();
         mCamera.setDisplayOrientation(90);
-        cameraPreview = (LinearLayout) findViewById(R.id.cPreview);
+        cameraPreview = findViewById(R.id.cPreview);
         mPreview = new CameraPreview(myContext, mCamera);
         cameraPreview.addView(mPreview);
+        mPicture = getPictureCallback(); // ??
 
-        capture = (Button) findViewById(R.id.btnCam);
+        capture = findViewById(R.id.btnCam);
         capture.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                mCamera.takePicture(null, null, mPicture);
+                if (safeToTakePicture) {
+                    mCamera.takePicture(null, null, mPicture);
+                    safeToTakePicture = false;
+                }
             }
         });
 
-        switchCamera = (Button) findViewById(R.id.btnSwitch);
+        switchCamera = findViewById(R.id.btnSwitch);
         switchCamera.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -66,6 +72,8 @@ public class MainActivity extends AppCompatActivity {
         });
 
         mCamera.startPreview();
+        safeToTakePicture = true;
+
 
     }
 
@@ -174,6 +182,7 @@ public class MainActivity extends AppCompatActivity {
                 bitmap = BitmapFactory.decodeByteArray(data, 0, data.length);
                 Intent intent = new Intent(MainActivity.this,PictureActivity.class);
                 startActivity(intent);
+                safeToTakePicture = true;
             }
         };
         return picture;
