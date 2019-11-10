@@ -40,7 +40,7 @@ public class signDetector {
         private static final int DIM_BATCH_SIZE = 1;
         private static final int DIM_IMG_SIZE_X = 244;
         private static final int DIM_IMG_SIZE_Y = 244;
-        private static final int DIM_PIXEL_SIZE = 1;
+        private static final int DIM_PIXEL_SIZE = 3;
         private static final int BYTE_SIZE_OF_FLOAT = 4;
 
         private PriorityQueue<Map.Entry<String, Float>> sortedLabels =
@@ -142,7 +142,11 @@ public class signDetector {
                 int pixel = pixels[i];
                 // The color of the input is black so the blue channel will be 0xFF.
                 int channel = pixel & 0xff;
-                inputBuffer.putFloat(0xff - channel);
+
+                inputBuffer.putFloat(pixel & 0xFFFF0000); // R
+                inputBuffer.putFloat(pixel & 0xFF00FF00); // G
+                inputBuffer.putFloat(pixel & 0xFF0000FF); // B
+
             }
             long endTime = SystemClock.uptimeMillis();
             Log.d(TAG, "Time cost to put values into ByteBuffer: " + Long.toString(endTime - startTime));

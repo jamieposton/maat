@@ -256,6 +256,7 @@ public class MainActivity extends AppCompatActivity {
                 prepBitmap();
                 updateModelInput();
 
+
                 TextView tv = findViewById(R.id.prediction);
                 tv.setText("Welcome to android");
 
