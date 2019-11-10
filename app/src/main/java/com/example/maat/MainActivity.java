@@ -27,11 +27,9 @@ public class MainActivity extends AppCompatActivity {
     private boolean cameraFront = false;
 
     public static Bitmap bitmap;
-    private Matrix rot_mat;
-    private static int crop_x = 0;
-    private static int crop_y = 0;
-    private static int crop_w = 800;
-    private static int crop_h = 800;
+    private static Matrix rot_mat;
+
+//    public static float[] modelInp;
 
 
 
@@ -42,9 +40,10 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        // Initialize Rotation Matrix (90 degrees)
+        // Initialize Rotation Matrix (90 degrees) so to rotate the bitmap after an image is taken.
         rot_mat = new Matrix();
         rot_mat.postRotate(90);
+
 
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
         myContext = this;
@@ -195,6 +194,20 @@ public class MainActivity extends AppCompatActivity {
             public void onPictureTaken(byte[] data, Camera camera) {
                 bitmap = BitmapFactory.decodeByteArray(data, 0, data.length);
                 //Rotate bitmap so it's properly oriented
+                int crop_x, crop_y, crop_w, crop_h;
+                int w = bitmap.getWidth();
+                int h = bitmap.getHeight();
+                if (w<h){
+                    crop_h = crop_w = w;
+                    crop_x = (int) ((h-w)/2.0);
+                    crop_y = 0;
+                }
+                else{
+                    crop_h = crop_w = h;
+                    crop_x = 0;
+                    crop_y = (int) ((w-h)/2.0);
+                }
+
                 bitmap = Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(), bitmap.getHeight(), rot_mat, false);
                 // Crop bitmap
                 bitmap = Bitmap.createBitmap(bitmap, crop_x, crop_y, crop_w, crop_h);
