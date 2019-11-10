@@ -16,6 +16,7 @@ import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.LinearLayout;
 import org.tensorflow.lite.Interpreter;
+import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -40,9 +41,7 @@ public class MainActivity extends AppCompatActivity {
 
     public static Bitmap bitmap;
     private static Matrix rot_mat;
-
-
-//    public static float[] modelInp;
+    public static float[][][] modelInput = new float[244][244][3];
 
 
 
@@ -106,7 +105,6 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private int findFrontFacingCamera() {
-
         int cameraId = -1;
         // Search for the front facing camera
         int numberOfCameras = Camera.getNumberOfCameras();
@@ -136,7 +134,6 @@ public class MainActivity extends AppCompatActivity {
                 cameraId = i;
                 cameraFront = false;
                 break;
-
             }
 
         }
@@ -144,7 +141,6 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void onResume() {
-
         super.onResume();
         if(mCamera == null) {
             mCamera = Camera.open();
@@ -203,31 +199,65 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    public void updateModelInput() {
+        int px, ir, ig, ib;
+        float fr, fg, fb;
+        for (int x=0; x<244; x++){
+            for (int y=0; y<244; y++){
+                // Get color channel values from the pixel.
+                // Bitmap stores each value as a single int, with two bytes for Alpha, R, G and B
+                // To extract color channel, the Alpha and color are bitwise and-ed with the pixel
+                px = bitmap.getPixel(x, y);
+                ir = px & 0xFFFF0000;
+                ig = px & 0xFF00FF00;
+                ib = px & 0xFF0000FF;
+
+                // Convert to floats ranging from 0 to 1 for tensorflow
+                fr = (float) (ir/255.0);
+                fg = (float) (ig/255.0);
+                fb = (float) (ib/255.0);
+
+                // Store stuff in the float array for model input
+                modelInput[x][y][0] = fr;
+                modelInput[x][y][1] = fg;
+                modelInput[x][y][2] = fb;
+            }
+        }
+    }
+
+    public void prepBitmap() {
+        //Rotate bitmap so it's properly oriented
+        int crop_x, crop_y, crop_w, crop_h;
+        int w = bitmap.getWidth();
+        int h = bitmap.getHeight();
+        if (w<h){
+            crop_h = crop_w = w;
+            crop_x = (int) ((h-w)/2.0);
+            crop_y = 0;
+        }
+        else{
+            crop_h = crop_w = h;
+            crop_x = 0;
+            crop_y = (int) ((w-h)/2.0);
+        }
+
+        bitmap = Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(), bitmap.getHeight(), rot_mat, false);
+        // Crop bitmap
+        bitmap = Bitmap.createBitmap(bitmap, crop_x, crop_y, crop_w, crop_h);
+        // Resize bitmap to 244 by 244
+        bitmap = Bitmap.createScaledBitmap(bitmap, 244, 244, false);
+    }
+
     private Camera.PictureCallback getPictureCallback() {
         Camera.PictureCallback picture = new Camera.PictureCallback() {
             @Override
             public void onPictureTaken(byte[] data, Camera camera) {
                 bitmap = BitmapFactory.decodeByteArray(data, 0, data.length);
-                //Rotate bitmap so it's properly oriented
-                int crop_x, crop_y, crop_w, crop_h;
-                int w = bitmap.getWidth();
-                int h = bitmap.getHeight();
-                if (w<h){
-                    crop_h = crop_w = w;
-                    crop_x = (int) ((h-w)/2.0);
-                    crop_y = 0;
-                }
-                else{
-                    crop_h = crop_w = h;
-                    crop_x = 0;
-                    crop_y = (int) ((w-h)/2.0);
-                }
+                prepBitmap();
+                updateModelInput();
 
-                bitmap = Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(), bitmap.getHeight(), rot_mat, false);
-                // Crop bitmap
-                bitmap = Bitmap.createBitmap(bitmap, crop_x, crop_y, crop_w, crop_h);
-                // Resize bitmap to 244 by 244
-                bitmap = Bitmap.createScaledBitmap(bitmap, 244, 244, false);
+                TextView tv = findViewById(R.id.prediction);
+                tv.setText("Welcome to android");
 
                 Intent intent = new Intent(MainActivity.this,PictureActivity.class);
                 startActivity(intent);
