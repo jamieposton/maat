@@ -4,8 +4,10 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Matrix;
 import android.hardware.Camera;
 import android.os.Bundle;
+import android.service.autofill.ImageTransformation;
 import android.util.Log;
 import android.view.View;
 import android.view.WindowManager;
@@ -23,7 +25,15 @@ public class MainActivity extends AppCompatActivity {
     private Context myContext;
     private LinearLayout cameraPreview;
     private boolean cameraFront = false;
+
     public static Bitmap bitmap;
+    private Matrix rot_mat;
+    private static int crop_x = 0;
+    private static int crop_y = 0;
+    private static int crop_w = 800;
+    private static int crop_h = 800;
+
+
 
     private boolean safeToTakePicture = false;
 
@@ -31,6 +41,10 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        // Initialize Rotation Matrix (90 degrees)
+        rot_mat = new Matrix();
+        rot_mat.postRotate(90);
 
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
         myContext = this;
@@ -180,11 +194,22 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onPictureTaken(byte[] data, Camera camera) {
                 bitmap = BitmapFactory.decodeByteArray(data, 0, data.length);
+                //Rotate bitmap so it's properly oriented
+                bitmap = Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(), bitmap.getHeight(), rot_mat, false);
+                // Crop bitmap
+                bitmap = Bitmap.createBitmap(bitmap, crop_x, crop_y, crop_w, crop_h);
+                // Resize bitmap to 244 by 244
+                bitmap = Bitmap.createScaledBitmap(bitmap, 244, 244, false);
+
                 Intent intent = new Intent(MainActivity.this,PictureActivity.class);
                 startActivity(intent);
                 safeToTakePicture = true;
             }
         };
+
+        // Crop bitmap
+//        bitmap = Bitmap.createBitmap(bitmap, )
+
         return picture;
     }
 }
