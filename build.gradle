@@ -16,6 +16,9 @@ buildscript {
 
 allprojects {
     repositories {
+        maven {
+            url 'https://google.bintray.com/tensorflow'
+        }
         google()
         jcenter()
         

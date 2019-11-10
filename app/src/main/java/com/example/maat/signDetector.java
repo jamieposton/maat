@@ -2,15 +2,19 @@ package com.example.maat;
 
 import android.app.Activity;
 import android.content.res.AssetFileDescriptor;
+import android.content.res.AssetManager;
 import android.graphics.Bitmap;
 import android.os.SystemClock;
 import android.util.Log;
+
+import com.example.maat.MainActivity;
 
 import org.tensorflow.lite.Interpreter;
 
 import java.io.BufferedReader;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
@@ -24,9 +28,6 @@ import java.util.Map;
 import java.util.PriorityQueue;
 
 public class signDetector {
-
-
-
 
         private final String TAG = this.getClass().getSimpleName();
         private Interpreter tflite;
@@ -113,7 +114,13 @@ public class signDetector {
         }
 
         private MappedByteBuffer loadModelFile(Activity activity) throws IOException {
+            String tag = "loading???????????";
+            Log.d(tag, "beforeasset");
+            final AssetManager assets = activity.getAssets();
+            final String[] names = assets.list( "" );
             AssetFileDescriptor fileDescriptor = activity.getAssets().openFd(MODEL_PATH);
+            Log.d(tag, "afterasset");
+
             FileInputStream inputStream = new FileInputStream(fileDescriptor.getFileDescriptor());
             FileChannel fileChannel = inputStream.getChannel();
             long startOffset = fileDescriptor.getStartOffset();

@@ -47,6 +47,8 @@ public class MainActivity extends AppCompatActivity {
         rot_mat = new Matrix();
         rot_mat.postRotate(90);
 
+        signClassifier = new signDetector(this);
+
 
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
         myContext = this;
@@ -249,10 +251,9 @@ public class MainActivity extends AppCompatActivity {
                 TextView tv = findViewById(R.id.prediction);
                 tv.setText("Welcome to android");
 
-                Intent intent = new Intent(MainActivity.this,PictureActivity.class);
-                startActivity(intent);
+                if(signClassifier == null){
 
-
+                }
                 String guess = signClassifier.classify(bitmap);
 
 
