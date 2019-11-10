@@ -191,7 +191,7 @@ public class MainActivity extends AppCompatActivity {
                 // Get color channel values from the pixel.
                 // Bitmap stores each value as a single int, with two bytes for Alpha, R, G and B
                 // To extract color channel, the Alpha and color are bitwise and-ed with the pixel
-                px = bitmap.getPixel(x, y)
+                px = bitmap.getPixel(x, y);
                 ir = px & 0xFFFF0000;
                 ig = px & 0xFF00FF00;
                 ib = px & 0xFF0000FF;
