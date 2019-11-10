@@ -1,7 +1,9 @@
 package com.example.maat;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.content.res.AssetFileDescriptor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Matrix;
@@ -13,8 +15,16 @@ import android.view.View;
 import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.LinearLayout;
+import org.tensorflow.lite.Interpreter;
 
 import androidx.appcompat.app.AppCompatActivity;
+
+import com.example.maat.ui.signDetector;
+
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.nio.MappedByteBuffer;
+import java.nio.channels.FileChannel;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -25,15 +35,20 @@ public class MainActivity extends AppCompatActivity {
     private Context myContext;
     private LinearLayout cameraPreview;
     private boolean cameraFront = false;
+    private signDetector signClassifier = null;
+
 
     public static Bitmap bitmap;
     private static Matrix rot_mat;
+
 
 //    public static float[] modelInp;
 
 
 
     private boolean safeToTakePicture = false;
+
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -216,6 +231,14 @@ public class MainActivity extends AppCompatActivity {
 
                 Intent intent = new Intent(MainActivity.this,PictureActivity.class);
                 startActivity(intent);
+
+
+                String guess = signClassifier.classify(bitmap);
+
+
+                Log.d("butts",  "Found Image = " + guess);
+
+
                 safeToTakePicture = true;
             }
         };
