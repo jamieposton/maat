@@ -13,6 +13,7 @@ import android.view.View;
 import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.LinearLayout;
+import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -239,6 +240,9 @@ public class MainActivity extends AppCompatActivity {
                 bitmap = BitmapFactory.decodeByteArray(data, 0, data.length);
                 prepBitmap();
                 updateModelInput();
+
+                TextView tv = findViewById(R.id.prediction);
+                tv.setText("Welcome to android");
 
                 Intent intent = new Intent(MainActivity.this,PictureActivity.class);
                 startActivity(intent);
